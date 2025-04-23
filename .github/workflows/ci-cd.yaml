@@ -8,43 +8,51 @@ jobs:
   build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+    - name: Checkout code
+      uses: actions/checkout@v3
 
     - name: Log in to Docker Hub
       run: echo "${{ secrets.DOCKER_PASSWORD }}" | docker login -u "${{ secrets.DOCKER_USERNAME }}" --password-stdin
 
-    - name: Build and push backend
+    - name: Build and push Backend Docker image
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/backend:latest ./backend
         docker push ${{ secrets.DOCKER_USERNAME }}/backend:latest
 
-    - name: Build and push frontend
+    - name: Build and push Frontend Docker image
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/frontend:latest ./frontend
         docker push ${{ secrets.DOCKER_USERNAME }}/frontend:latest
 
-    - name: Set up Kubeconfig
+    - name: Setup kubeconfig
       run: |
         mkdir -p ~/.kube
-        echo "${{ secrets.KUBECONFIG }}" > ~/.kube/config
+        echo "${{ secrets.KUBECONFIG }}" | base64 --decode > ~/.kube/config
+        chmod 600 ~/.kube/config
 
-    - name: Set up Helm
+    - name: Setup Helm
       uses: azure/setup-helm@v3
       with:
         version: v3.12.0
 
-    - name: Deploy Backend via Helm
+    - name: Deploy Backend with Helm
       run: |
         helm upgrade --install backend ./k8s-helm/backend-chart \
           --namespace default --create-namespace \
           --set image.repository=${{ secrets.DOCKER_USERNAME }}/backend \
-          --set image.tag=latest
+          --set image.tag=latest \
+          --wait --atomic
 
-    - name: Deploy Frontend via Helm
+    - name: Deploy Frontend with Helm
       run: |
         helm upgrade --install frontend ./k8s-helm/frontend-chart \
           --namespace default --create-namespace \
           --set image.repository=${{ secrets.DOCKER_USERNAME }}/frontend \
+<<<<<<< HEAD
           --set image.tag=latest
 
           
+=======
+          --set image.tag=latest \
+          --wait --atomic
+>>>>>>> 79e6c1a (CI/CD pipeline chnages)
