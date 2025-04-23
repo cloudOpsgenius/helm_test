@@ -2,7 +2,7 @@ name: CI/CD for Helm App
 
 on:
   push:
-    branches: [master]
+    branches: [main]
 
 jobs:
   build-and-deploy:
@@ -48,11 +48,5 @@ jobs:
         helm upgrade --install frontend ./k8s-helm/frontend-chart \
           --namespace default --create-namespace \
           --set image.repository=${{ secrets.DOCKER_USERNAME }}/frontend \
-<<<<<<< HEAD
-          --set image.tag=latest
-
-          
-=======
           --set image.tag=latest \
           --wait --atomic
->>>>>>> 79e6c1a (CI/CD pipeline chnages)
