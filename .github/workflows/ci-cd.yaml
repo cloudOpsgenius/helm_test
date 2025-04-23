@@ -50,3 +50,5 @@ jobs:
           --set image.repository=${{ secrets.DOCKER_USERNAME }}/frontend \
           --set image.tag=latest \
           --wait --atomic
+
+          
